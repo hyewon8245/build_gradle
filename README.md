@@ -16,48 +16,40 @@ pipeline선택
 ```bash
 pipeline {
     agent any
-	
-    environment {
-        GITHUB_REPO = 'https://github.com/hyewon8245/build_gradle.git'
-        BRANCH_NAME = 'main'
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                git branch: "${BRANCH_NAME}", url: "${GITHUB_REPO}"
-                
-                echo '**********'
-                sh 'ls -al'  
-                echo '**********'
+                git branch: 'main', url: 'https://github.com/hyewon8245/build_gradle.git'
+                echo "**********"
+                sh 'ls -al'
+                echo "**********"
             }
         }
-
         stage('Build') {
             steps {
                 script {
                     if (fileExists('gradlew')) {
-                            sh 'chmod +x gradlew'
-                            sh './gradlew build'
+                        sh 'chmod +x gradlew'
+                        sh './gradlew build'
                     } else if (fileExists('pom.xml')) {
-	                      sh 'mvn clean package'
+                        sh 'mvn clean package'
                     } else {
                         error 'Gradle 또는 Maven 프로젝트가 아님'
                     }
                 }
             }
-        }
+        }   // ✅ stage('Build') 블록 닫기
     }
-
     post {
-        success {
-            echo '✅ 빌드 성공!'
-        }
         failure {
-            echo '❌ 빌드 실패! 오류 확인 필요!'
+            echo "❌ 빌드 실패! 오류 확인 필요!"
+        }
+        success {
+            echo "✅ 빌드 성공!"
         }
     }
 }
+
 
 ```
 
