@@ -287,3 +287,5 @@ docker run -d --name myjenkins \
 - Jenkins 컨테이너를 껐다 켜도, 심지어 삭제해도 데이터가 유지됨
 
 ---
+## 확인
+ngrok
