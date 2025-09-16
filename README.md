@@ -214,7 +214,7 @@ sudo ls -al /var/lib/docker/volumes/gradle_vol/_data
 
 </aside>
 
-👉 정리하면 지금 상황은
+### 👉 정리하면 지금 상황은
 
 - 현재 띄운 Jenkins 컨테이너가 **volume 없이 실행**되고 있고,
 - `/var/jenkins_home` 은 컨테이너 내부에만 있어서 컨테이너 삭제 시 날아감,
@@ -234,7 +234,7 @@ docker ps
 
 예: `myjenkins`
 
-1. **컨테이너 내부 `/var/jenkins_home` → tar 백업**
+2. **컨테이너 내부 `/var/jenkins_home` → tar 백업**
 
 ```bash
 docker cp myjenkins:/var/jenkins_home ./jenkins_home_backup
@@ -256,7 +256,7 @@ docker volume create jenkins_home
 
 ```
 
-1. 호스트에서 직접 백업 데이터 volume에 넣기
+2. 호스트에서 직접 백업 데이터 volume에 넣기
 
 ```bash
 sudo cp -r jenkins_home_backup/* /var/lib/docker/volumes/jenkins_home/_data/
@@ -264,13 +264,13 @@ sudo chown -R 1000:1000 /var/lib/docker/volumes/jenkins_home/_data
 
 ```
 
-1. volume에 jenkins가 접근할 수 있도록 권한 부여
+3. volume에 jenkins가 접근할 수 있도록 권한 부여
 
 ```bash
 sudo chown -R 1000:1000 /var/lib/docker/volumes/jenkins_home/_data 
 ```
 
-1. Jenkins 컨테이너 실행 시 volume 연결 ( 또 더 원하는 volume 도 mount해서 실행도 가능하다.)
+4. Jenkins 컨테이너 실행 시 volume 연결 ( 또 더 원하는 volume 도 mount해서 실행도 가능하다.)
 
 ```bash
 docker run -d --name myjenkins \
