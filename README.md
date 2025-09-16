@@ -288,4 +288,4 @@ docker run -d --name myjenkins \
 
 ---
 ## 확인
-ngrok
+ngrok이 확인 되어야함
