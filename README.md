@@ -163,7 +163,127 @@ docker run -d -p 8088:8088 my-gradle-app
 
 <aside>
 💡
-
 실행된 걸 확인할 수 있다.
 
 </aside>
+
+---
+
+## volume mount
+
+```bash
+docker volume create gradle_vol
+```
+
+```bash
+docker run -d --name myjenkins \
+  -p 8080:8080 -p 50000:50000 \
+  -v $(pwd)/jenkins_home_backup:/var/jenkins_home \
+  -v gradle_vol:/var/jenkins_home/workspace \
+  jenkins/jenkins:lts-jdk17
+```
+
+### 오류
+
+<aside>
+💡
+
+volume에 jenkins 접근 권한이 없음
+
+</aside>
+
+```bash
+sudo chown -R 1000:1000 /var/lib/docker/volumes/gradle_vol/_data
+```
+
+**빌드 실행 후**
+
+```bash
+sudo ls -al /var/lib/docker/volumes/gradle_vol/_data
+```
+
+![image.png](img/image%2011.png)
+
+---
+
+### 📌 오류 - 원래 지금 걸 유지한 상태로 volume을 mount하고 싶었다면
+
+<aside>
+💡
+/jenkins_home_backup이 현재 backup파일을 모두 가지고 있음. 이걸 volume으로 옮길 것
+
+</aside>
+
+👉 정리하면 지금 상황은
+
+- 현재 띄운 Jenkins 컨테이너가 **volume 없이 실행**되고 있고,
+- `/var/jenkins_home` 은 컨테이너 내부에만 있어서 컨테이너 삭제 시 날아감,
+- 그래서 **지금 데이터를 백업**해두고,
+- 앞으로는 Jenkins를 킬 때 **jenkins_home volume**을 연결해서 쓰고 싶다는 얘기
+
+---
+
+## 📌 지금 데이터 백업하기
+
+1. **컨테이너 이름 확인**
+
+```bash
+docker ps
+
+```
+
+예: `myjenkins`
+
+1. **컨테이너 내부 `/var/jenkins_home` → tar 백업**
+
+```bash
+docker cp myjenkins:/var/jenkins_home ./jenkins_home_backup
+
+```
+
+→ 현재 디렉토리에 `jenkins_home_backup.tar.gz` 생김.
+
+이 안에 Jenkins 모든 데이터(admin 계정, 플러그인, job 등) 들어있습니다.
+
+---
+
+## 📌 이후 Jenkins 실행 시 volume 사용
+
+1. 새로운 volume 생성
+
+```bash
+docker volume create jenkins_home
+
+```
+
+1. 호스트에서 직접 백업 데이터 volume에 넣기
+
+```bash
+sudo cp -r jenkins_home_backup/* /var/lib/docker/volumes/jenkins_home/_data/
+sudo chown -R 1000:1000 /var/lib/docker/volumes/jenkins_home/_data
+
+```
+
+1. volume에 jenkins가 접근할 수 있도록 권한 부여
+
+```bash
+sudo chown -R 1000:1000 /var/lib/docker/volumes/jenkins_home/_data 
+```
+
+1. Jenkins 컨테이너 실행 시 volume 연결 ( 또 더 원하는 volume 도 mount해서 실행도 가능하다.)
+
+```bash
+docker run -d --name myjenkins \
+  -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  jenkins/jenkins:lts-jdk17
+```
+
+---
+
+✅ 이렇게 하면:
+
+- **앞으로는 항상 jenkins_home volume에 데이터가 저장**됨
+- Jenkins 컨테이너를 껐다 켜도, 심지어 삭제해도 데이터가 유지됨
+
+---
