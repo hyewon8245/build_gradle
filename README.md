@@ -1,7 +1,7 @@
 # build_gradle
 gradle project jenkins에 빌드 연습
 
-# 20250916 미션
+# gradle 프로젝트 빌드
 
 ### 상황
 
